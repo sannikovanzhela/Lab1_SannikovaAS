@@ -1,0 +1,172 @@
+﻿<Window x:Class="RegistrationApp_Test.RegistrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        xmlns:xceed="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:RegistrationApp_Test"
+        mc:Ignorable="d"
+        Height="700" Width="400"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        MouseDown="WindowMouseDown">
+
+
+    <Grid>
+
+        <StackPanel Width="300"
+                    VerticalAlignment="Center"
+                    x:Name="LogIn">
+
+            <TextBlock Text="Регистрация" 
+                       Style="{StaticResource titleText}"
+                       Margin="0 0 0 10"/>
+
+            <Border BorderThickness="1" 
+                        BorderBrush="#acb0af" 
+                        Margin="50 7"
+                        CornerRadius="5">
+                <Grid Margin="7 9">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <fa:ImageAwesome Icon="User" 
+                                     Height="20"
+                                     Foreground="#5A6794"/>
+                    <TextBlock x:Name="textLogin" 
+                                       Text="Логин"
+                                       MouseDown="textLoginMouseDown"
+                                       Style="{StaticResource textHint}"/>
+                    <xceed:MaskedTextBox x:Name="txtLogin"
+                                     Style="{StaticResource textBox}"
+                                     Grid.Column="1"
+                                     TextChanged="txtLoginTextChanged"
+                                         KeyUp="txtLoginKeyUp"/>
+                </Grid>
+            </Border>
+            
+           
+
+            <Button x:Name="btnLogin"
+                                Style="{StaticResource passButton}"
+                                VerticalAlignment="Top"
+                                Click="btnLoginMessage">
+                <TextBlock>
+                    <Underline>Требования к логину</Underline>
+                </TextBlock>
+            </Button>
+
+            <Button x:Name="btnLoginCollapsed"
+                                Style="{StaticResource passButton}"
+                                VerticalAlignment="Top"
+                                Visibility="Collapsed"
+                    Click="btnLoginCollapsedClick">
+                <TextBlock>
+                    <Underline>Скрыть требования</Underline>
+                </TextBlock>
+            </Button>
+
+            <TextBlock Name="LoginMessage"
+                       Style="{StaticResource textHint}"
+                       Text="В качестве логина можно использовать:
+                       •номер телефона; 
+                       •электронную почту; 
+                       •строку латинских символов и знак подчеркивания
+                       Минимум 5 символов"
+                       Margin="50 0" TextWrapping="Wrap"
+                       Foreground="#1C2135"
+                       Visibility="Collapsed"/>
+
+            <Border BorderThickness="1" 
+                        BorderBrush="#acb0af" 
+                        Margin="50 7"
+                        CornerRadius="5">
+                <Grid Margin="7 9">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <fa:ImageAwesome Icon="Unlock" 
+                                     Height="20"
+                                     Foreground="#5A6794"/>
+
+                    <TextBlock x:Name="textPassword" 
+                                       Text="Пароль" 
+                                       MouseDown="textPasswordMouseDown"
+                                       Style="{StaticResource textHint}"/>
+
+                    <PasswordBox x:Name="txtPassword"
+                                         Style="{StaticResource textBox}"
+                                         PasswordChanged="txtPasswordTextChanged"/>
+                </Grid>
+            </Border>
+
+            <Button x:Name="btnPassword"
+                                Style="{StaticResource passButton}"
+                                VerticalAlignment="Top"
+                                Click="btnPasswordMessage">
+                <TextBlock>
+                    <Underline>Требования к паролю</Underline>
+                </TextBlock>
+            </Button>
+
+            <Button x:Name="btnPasswordCollapsed"
+                                Style="{StaticResource passButton}"
+                                VerticalAlignment="Top"
+                                Visibility="Collapsed"
+                    Click="btnPasswordCollapsedClick">
+                <TextBlock>
+                    <Underline>Скрыть требования</Underline>
+                </TextBlock>
+            </Button>
+
+
+            <TextBlock Name="PasswordMessage"
+                       Style="{StaticResource textHint}"
+                       Text="•минимум 7 символов;
+                       •только кириллица, цифры и спецсимволы;
+                       •присутствие минимум одной буквы в верхнем и нижнем регистре;
+                       •присутствие одной цифры;
+                       •присутсвтие одного спецсимвола"
+                        Margin="50 0" TextWrapping="Wrap"
+                       Foreground="#1C2135"
+                       Visibility="Collapsed"/>
+
+            <Border BorderThickness="1" 
+                        BorderBrush="#acb0af" 
+                        Margin="50 7"
+                        CornerRadius="5">
+                <Grid Margin="7 9">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <fa:ImageAwesome Icon="Lock" 
+                                     Height="20"
+                                     Foreground="#5A6794"/>
+
+                    <TextBlock x:Name="textCheck" 
+                                       Text="Повторите пароль" 
+                                       MouseDown="textСheckMouseDown"
+                                       Style="{StaticResource textHint}"/>
+
+                    <PasswordBox x:Name="txtCheck"
+                                         Style="{StaticResource textBox}"
+                                         PasswordChanged="txtCheckTextChanged"/>
+                </Grid>
+            </Border>
+
+            <Button Content="Зарегистрироваться"
+                            Style="{StaticResource enterButton}"
+                           Click="btnSignClick"
+                    Margin="0 20"/>
+
+        </StackPanel>
+        
+        
+    </Grid>
+</Window>
