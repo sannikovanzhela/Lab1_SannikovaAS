@@ -181,45 +181,17 @@ namespace RegistrationApp_Test
 
             try
             {
-                UserInformation();
-                ValidateUser();
+                //UserInformation();
+                //ValidateUser();
 
-                bool validLogin, create;
-                using (SqlConnection connection = new SqlConnection("Data Source = LAPTOP-1BQG2FKL\\SQLEXPRESS; Initial Catalog = UsersDB; Integrated Security=true"))
-                using (var command = new SqlCommand())
-                {
-                    connection.Open();
-                    command.Connection = connection;
-                    command.CommandText = "select UserLogin from Users where UserLogin=@UserLogin";
-                    command.Parameters.Add("@UserLogin", System.Data.SqlDbType.NVarChar).Value = txtLogin.Text;
-                    validLogin = command.ExecuteScalar() == null ? false : true;
-                    if (validLogin)
-                    {
-                        System.Windows.MessageBox.Show("False\n" +
-                            "Пользователь с таким логином уже существует!");
-                        create = false;
-                        connection.Close();
-                    }
-                    else
-                    {
-                        command.CommandText = "insert into Users values (@UserLogin, @UserPassword)";
-                        command.Parameters.Add("@UserLogin", System.Data.SqlDbType.NVarChar).Value = txtLogin.Text;
-                        command.Parameters.Add("@UserPassword", System.Data.SqlDbType.NVarChar).Value = txtPassword.Password;
-                        command.ExecuteNonQuery();
-                        create = true;
-                        connection.Close();
-                    }
-                }
-                if (create)
-                {
-                    string pass = txtPassword.Password;
-                    System.Windows.MessageBox.Show("True");
-                    Log.Information("Логин: " + txtLogin.Text + "\nПароль: " + pass + "\nПодтверждение пароля: " + txtCheck.ToString() + "\nУспешная регистрация.");
-                }
+
+                string pass = txtPassword.Password;
+                System.Windows.MessageBox.Show("True");
+                Log.Information("Логин: " + txtLogin.Text + "\nПароль: " + pass + "\nПодтверждение пароля: " + txtCheck.ToString() + "\nУспешная регистрация.");
             }
             catch
             {
-             
+
             }
         }
 
