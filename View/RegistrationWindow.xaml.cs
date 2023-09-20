@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Xml.Linq;
-using Xceed.Wpf.Toolkit;
 using Serilog;
 using System.Text.RegularExpressions;
+using RegistrationApp_Test.Database;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Data.Entity;
+using System.IO;
 
 namespace RegistrationApp_Test
 {
@@ -25,14 +18,25 @@ namespace RegistrationApp_Test
     /// </summary>
     public partial class RegistrationWindow : Window
     {
+        ApplicationContext db;
         public RegistrationWindow()
         {
             InitializeComponent();
 
+            // в папке bin/Debug/Log
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File("Log/LogFile.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(Path.Combine(AppContext.BaseDirectory, "Logs/Log.txt"), rollingInterval: RollingInterval.Day)
                 .CreateLogger();
+
+            Log.Verbose("Логгер сконфигурирован");
+            Log.Information("Приложение запущено");
+
+            db = new ApplicationContext();
+            db.Users.Load();
+            this.DataContext = db.Users.Local.ToBindingList();
+            Log.Information("Получение данных из базы данных");
+
         }
 
         #region txt
@@ -110,40 +114,40 @@ namespace RegistrationApp_Test
         {
             if (string.IsNullOrEmpty(txtLogin.Text))
             {
-                Log.Information("Логин не введен");
+                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Логин не введен");
                 throw new Exception("Введите логин!");
             }
             else if (txtPassword.Password == null)
             {
-                Log.Information("Пароль не введен");
+                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Пароль не введен");
                 throw new Exception("Введите пароль!");
             }
             else if (txtCheck.Password == null)
             {
-                Log.Information("Пароль не был введен повторно");
+                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Пароль не был введен повторно");
                 throw new Exception("Повторите пароль!");
             }
             else if (string.IsNullOrEmpty(txtLogin.Text) && txtPassword.Password == null) {
-                Log.Information("Пароль и логин не введены");
-                throw new Exception("Логин и пароль не введены");
+                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации.Пароль и логин не введены");
+                throw new Exception("Введите логин и пароль!");
             }
             else if (string.IsNullOrEmpty(txtLogin.Text) && txtCheck.Password == null)
             {
-                Log.Information("Логин не введен и пароль не был введен повторно");
-                throw new Exception("Логин не введен и пароль не был введен повторно");
+                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Логин не введен и пароль не был введен повторно");
+                throw new Exception("Введите логин и повторите пароль!");
             }
             else if (txtPassword.Password == null && txtCheck.Password == null)
             {
-                Log.Information("Пароль не введен и пароль не был введен повторно");
-                throw new Exception("Пароль не введен и пароль не был введен повторно");
+                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Пароль не введен и пароль не был введен повторно");
+                throw new Exception("Введите пароль и повторите его!");
             }
         }
 
-        public void ValidateUser()
+        public void UserVerification()
         {
             if (txtLogin.Text.Length < 5)
             {
-                Log.Information("Слишком маленький логин");
+                Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Слишком маленький логин");
                 throw new Exception("Логин должен содержать минимум 5 символов");
             }
 
@@ -156,42 +160,88 @@ namespace RegistrationApp_Test
             {
                 if (!(txtLogin.Text.Contains(".com") ^ txtLogin.Text.Contains(".ru")))
                 {
-                    Log.Information("Неверный формат почты");
-                    throw new Exception("Неверный формат почты!");
+                    Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Неверный формат почты");
+                    throw new Exception("Неверный формат почты. Почта должна быть формата (xxx@xxx.xxx)");
                     
                 }
             }
 
-            //if (txtPassword.Password.Length < 7 /*|| !Regex.IsMatch(txtPassword.ToString(), @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=_.]).+$")*/)
-            //{
-            //    Log.Information("Пароль не соответсвует требованиям");
-            //    throw new Exception("Пароль должен содержать минимум 7 символов и включать хотя бы одну букву в верхнем и нижнем регистре, одну цифру и один спецсимволыы @#$%^&+=_.");
-            //}
-
-            if (txtPassword.ToString() != txtCheck.ToString())
+            if (txtPassword.Password.Length < 7)
             {
-                Log.Information("Пароли не совпадают");
-                throw new Exception("Пароли не совпадают");
+                Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Пароль не соответсвует требованиям");
+                throw new Exception("Пароль должен содержать минимум 7 символов");
+            }
+            else if (!Regex.IsMatch(txtPassword.Password, @"^(?=.*[а-я])(?=.*[А-Я])(?=.*\d)(?=.*[@#$%^&+=_.]).+$"))
+            {
+                Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Пароль не соответсвует требованиям");
+                throw new Exception("Пароль должен содержать только кириллицу, цифры и спецсимволы.\nОбязательно присутствие минимум одной буквы в верхнем и нижнем регистре, одной цифры и одного спецсимвола @#$%^&+=_.");
+            }
+
+            if (txtPassword.Password != txtCheck.Password)
+            {
+                Log.Error("Невозможно зарегистрировать пользователя. Пароль не подтвержден");
+                throw new Exception("Пароль и потдверждение пароля не совпадают");
+            }
+        }
+
+        public void UserValidate(string login)
+        {
+            User authUser = null;
+
+            using (ApplicationContext context = new ApplicationContext())
+            {
+                Log.Debug("Поиск в базе данных пользователя с заданным логином");
+                authUser = context.Users.Where(x => x.UserLogin == login).FirstOrDefault();
+            }
+
+            if (authUser != null)
+            {
+                Log.Error("Не удалось зарегестрироваться. Пользователь с заданным логином уже существует");
+                throw new Exception("Пользователь с таким логином уже существует!");
             }
         }
 
 
         private void btnSignClick(object sender, RoutedEventArgs e)
         {
+            string login = txtLogin.Text.Trim();
+            string password = txtPassword.Password.Trim();
+            string check = txtCheck.Password.Trim();
 
             try
             {
-                //UserInformation();
-                //ValidateUser();
+                UserInformation();
+                UserValidate(login);
+                UserVerification();
+
+                Log.Debug("Добавление пользователя в базу данных");
+                User user = new User(txtLogin.Text.Trim(), txtPassword.Password.Trim());
+                db.Users.Add(user);
+                db.SaveChanges();
+
+                string pass, checkPass;
+
+                using (MD5CryptoServiceProvider maskPass = new MD5CryptoServiceProvider())
+                {
+                    UTF8Encoding uTF8 = new UTF8Encoding();
+                    byte[] bytes = maskPass.ComputeHash(uTF8.GetBytes(password));
+                    pass = Convert.ToBase64String(bytes);
+                }
+
+                using (MD5CryptoServiceProvider maskPass = new MD5CryptoServiceProvider())
+                {
+                    UTF8Encoding uTF8 = new UTF8Encoding();
+                    byte[] bytes = maskPass.ComputeHash(uTF8.GetBytes(check));
+                    checkPass = Convert.ToBase64String(bytes);
+                }
 
 
-                string pass = txtPassword.Password;
-                System.Windows.MessageBox.Show("True");
-                Log.Information("Логин: " + txtLogin.Text + "\nПароль: " + pass + "\nПодтверждение пароля: " + txtCheck.ToString() + "\nУспешная регистрация.");
+                MessageBox.Show("True");
+                Log.Information($"Успешная регистрация\nЛогин:{login}\nПароль:{pass}\nПодтверждение пароля:{checkPass}");
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show($"False\n{ex.Message}");
             }
         }
 
@@ -219,12 +269,15 @@ namespace RegistrationApp_Test
 
         private void txtLoginKeyUp(object sender, KeyEventArgs e)
         {
-            if ((e.Key == Key.Delete) || (e.Key == Key.Back))
+            if(txtLogin.Text.StartsWith("+"))
             {
-                e.Handled = true;
-                txtLogin.Mask = string.Empty;
-                txtLogin.Text = string.Empty;
-                textLogin.Focus();
+                if ((e.Key == Key.Delete) || (e.Key == Key.Back))
+                {
+                    e.Handled = true;
+                    txtLogin.Mask = string.Empty;
+                    txtLogin.Text = string.Empty;
+                    textLogin.Focus();
+                }
             }
         }
     }

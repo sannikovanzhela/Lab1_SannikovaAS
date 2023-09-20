@@ -155,11 +155,6 @@
   <ItemGroup>
     <Resource Include="images.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Log\LogFile.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

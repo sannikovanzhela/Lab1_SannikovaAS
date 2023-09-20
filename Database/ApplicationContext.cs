@@ -9,8 +9,8 @@ namespace RegistrationApp_Test.Database
 {
     class ApplicationContext: DbContext
     {
+        public ApplicationContext() : base("DefaultConnection") { }
         public DbSet<User> Users { get; set; }
 
-        public ApplicationContext() : base("DefaultConnection") { }
     }
 }
