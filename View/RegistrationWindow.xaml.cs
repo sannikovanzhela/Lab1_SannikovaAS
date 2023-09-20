@@ -112,74 +112,120 @@ namespace RegistrationApp_Test
 
         public void UserInformation()
         {
+            string pass, checkPass;
+
             if (string.IsNullOrEmpty(txtLogin.Text))
             {
-                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Логин не введен");
+                if (txtPassword.Password.Length < 1 && txtCheck.Password.Length < 1)
+                {
+                    Log.Warning("Невозможно зарегистрировать пользователя. Отсутствуют данные необходимые для регистрации.\n" +
+                        "Логин: отсутсвует\nПароль: отстутсвует\nПотдверждение пароля: отсутсвует");
+                    throw new Exception("Введите логин и пароль! Подтвердите пароль!");
+                }
+                
+                if (txtPassword.Password.Length < 1)
+                {
+                    checkPass = MaskedPassword(txtCheck.Password);
+                    Log.Warning($"Невозможно зарегистрировать пользователя. Отсутствуют данные необходимые для регистрации.\n" +
+                        $"Логин: отсутсвует\nПароль: отсутсвует\nПодтверждение пароля: {checkPass}");
+                    throw new Exception("Введите логин и пароль!");
+                }
+                
+                if (txtCheck.Password.Length < 1)
+                {
+                    pass = MaskedPassword(txtPassword.Password);
+                    Log.Warning($"Невозможно зарегистрировать пользователя. Отсутствуют данные необходимые для регистрации.\n" +
+                        $"Логин: отсутсвует\nПароль: {pass}\nПотдверждение пароля: отсутствует");
+                    throw new Exception("Введите логин и подтвердите пароль!");
+                }
+
+                pass = MaskedPassword(txtPassword.Password);
+                checkPass = MaskedPassword(txtCheck.Password);
+                Log.Warning($"Невозможно зарегистрировать пользователя. Отсутствуют данные необходимые для регистрации.\n" +
+                    $"Логин: отсутствует.\nПароль: {pass}\nПодтверждение пароля:{checkPass}");
                 throw new Exception("Введите логин!");
             }
-            else if (txtPassword.Password == null)
+            
+            if (txtPassword.Password.Length < 1)
             {
-                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Пароль не введен");
+                if (txtCheck.Password.Length < 1)
+                {
+                    Log.Warning($"Невозможно зарегистрировать пользователя. Отсутствуют данные необходимые для регистрации.\n" +
+                        $"Логин: {txtLogin.Text}\nПароль: отсутствует\nПодтверждение пароля: отсутствует");
+                    throw new Exception("Введите пароль и подтвердите его!");
+                }
+
+                checkPass = MaskedPassword(txtCheck.Password);
+                Log.Warning($"Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации.\n" +
+                    $"Логин: {txtLogin.Text}\nПароль: отсутствует\nПодтверждение пароля: {checkPass}");
                 throw new Exception("Введите пароль!");
             }
-            else if (txtCheck.Password == null)
+            
+            if (txtCheck.Password.Length < 1)
             {
-                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Пароль не был введен повторно");
-                throw new Exception("Повторите пароль!");
-            }
-            else if (string.IsNullOrEmpty(txtLogin.Text) && txtPassword.Password == null) {
-                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации.Пароль и логин не введены");
-                throw new Exception("Введите логин и пароль!");
-            }
-            else if (string.IsNullOrEmpty(txtLogin.Text) && txtCheck.Password == null)
-            {
-                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Логин не введен и пароль не был введен повторно");
-                throw new Exception("Введите логин и повторите пароль!");
-            }
-            else if (txtPassword.Password == null && txtCheck.Password == null)
-            {
-                Log.Warning("Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации. Пароль не введен и пароль не был введен повторно");
-                throw new Exception("Введите пароль и повторите его!");
+                pass = MaskedPassword(txtPassword.Password);
+                Log.Warning($"Невозможно зарегистрировать пользователя. Отстуствуют данные необходимые для регистрации.\n" +
+                    $"Логин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: отсутсвует");
+                throw new Exception("Подтвердите пароль!");
             }
         }
 
-        public void UserVerification()
+        public void LoginVerification()
         {
-            if (txtLogin.Text.Length < 5)
+            string pass = MaskedPassword(txtPassword.Password);
+            string checkPass = MaskedPassword(txtCheck.Password);
+
+            if (txtLogin.Text.Trim().Length < 5)
             {
-                Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Слишком маленький логин");
+                Log.Error($"Невозможно зарегистрировать пользователя. Логин не соотвествует требованиям.\n" +
+                    $"Логин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
                 throw new Exception("Логин должен содержать минимум 5 символов");
             }
-
-            if (Regex.IsMatch(txtLogin.ToString(), @"^[a-zA-Z0-9_]+$"))
-            {
-                return;
-            }
-
+            
             if (txtLogin.Text.Contains("@"))
             {
                 if (!(txtLogin.Text.Contains(".com") ^ txtLogin.Text.Contains(".ru")))
                 {
-                    Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Неверный формат почты");
+                    Log.Error($"Невозможно зарегистрировать пользователя. Неверный формат почты.\n" +
+                        $"Логин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
                     throw new Exception("Неверный формат почты. Почта должна быть формата (xxx@xxx.xxx)");
-                    
                 }
             }
+            
+            if (Regex.IsMatch(txtLogin.ToString(), @"^[a-zA-Z0-9_]+$"))
+                return;
+            
+            if (txtLogin.Text.StartsWith("+"))
+                return;
+
+            Log.Error($"Невозможно зарегистрировать пользователя. Логин не соотвествует требованиям.\n" +
+                $"Логин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
+            throw new Exception("Логин должен иметь только латиницу, цифры и знак подчеркивания _");
+        }
+
+        public void PasswordVerification()
+        {
+            string pass = MaskedPassword(txtPassword.Password);
+            string checkPass = MaskedPassword(txtCheck.Password);
 
             if (txtPassword.Password.Length < 7)
             {
-                Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Пароль не соответсвует требованиям");
+                Log.Error($"Невозможно зарегистрировать пользователя. Пароль не соответсвует требованиям.\n" +
+                    $"Логин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
                 throw new Exception("Пароль должен содержать минимум 7 символов");
             }
-            else if (!Regex.IsMatch(txtPassword.Password, @"^(?=.*[а-я])(?=.*[А-Я])(?=.*\d)(?=.*[@#$%^&+=_.]).+$"))
+            
+            if (!Regex.IsMatch(txtPassword.Password, @"^(?=.*[а-я])(?=.*[А-Я])(?=.*\d)(?=.*[@#$%^&+=_.]).+$"))
             {
-                Log.Error("Невозможно зарегистрировать пользователя. Данные не соотвествуют требованиям. Пароль не соответсвует требованиям");
+                Log.Error($"Невозможно зарегистрировать пользователя. Пароль не соответсвует требованиям.\n" +
+                    $"Логин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
                 throw new Exception("Пароль должен содержать только кириллицу, цифры и спецсимволы.\nОбязательно присутствие минимум одной буквы в верхнем и нижнем регистре, одной цифры и одного спецсимвола @#$%^&+=_.");
             }
 
             if (txtPassword.Password != txtCheck.Password)
             {
-                Log.Error("Невозможно зарегистрировать пользователя. Пароль не подтвержден");
+                Log.Error($"Невозможно зарегистрировать пользователя. Пароль не подтвержден.\n" +
+                    $"Логин:  {txtLogin.Text} \nПароль:  {pass} \nПодтверждение пароля: {checkPass}");
                 throw new Exception("Пароль и потдверждение пароля не совпадают");
             }
         }
@@ -196,7 +242,10 @@ namespace RegistrationApp_Test
 
             if (authUser != null)
             {
-                Log.Error("Не удалось зарегестрироваться. Пользователь с заданным логином уже существует");
+                string pass = MaskedPassword(txtPassword.Password);
+                string checkPass = MaskedPassword(txtCheck.Password);
+                Log.Error($"Не удалось зарегестрироваться. Пользователь с заданным логином уже существует\n" +
+                    $"Логин:  {txtLogin.Text} \nПароль:  {pass} \nПодтверждение пароля: {checkPass}");
                 throw new Exception("Пользователь с таким логином уже существует!");
             }
         }
@@ -204,45 +253,42 @@ namespace RegistrationApp_Test
 
         private void btnSignClick(object sender, RoutedEventArgs e)
         {
-            string login = txtLogin.Text.Trim();
-            string password = txtPassword.Password.Trim();
-            string check = txtCheck.Password.Trim();
-
             try
             {
                 UserInformation();
-                UserValidate(login);
-                UserVerification();
+                UserValidate(txtLogin.Text);
+                LoginVerification();
+                PasswordVerification();
 
                 Log.Debug("Добавление пользователя в базу данных");
                 User user = new User(txtLogin.Text.Trim(), txtPassword.Password.Trim());
                 db.Users.Add(user);
                 db.SaveChanges();
 
-                string pass, checkPass;
-
-                using (MD5CryptoServiceProvider maskPass = new MD5CryptoServiceProvider())
-                {
-                    UTF8Encoding uTF8 = new UTF8Encoding();
-                    byte[] bytes = maskPass.ComputeHash(uTF8.GetBytes(password));
-                    pass = Convert.ToBase64String(bytes);
-                }
-
-                using (MD5CryptoServiceProvider maskPass = new MD5CryptoServiceProvider())
-                {
-                    UTF8Encoding uTF8 = new UTF8Encoding();
-                    byte[] bytes = maskPass.ComputeHash(uTF8.GetBytes(check));
-                    checkPass = Convert.ToBase64String(bytes);
-                }
-
+                string pass = MaskedPassword(txtPassword.Password);
+                string checkPass = MaskedPassword(txtCheck.Password);
 
                 MessageBox.Show("True");
-                Log.Information($"Успешная регистрация\nЛогин:{login}\nПароль:{pass}\nПодтверждение пароля:{checkPass}");
+                Log.Information($"Успешная регистрация\nЛогин: {txtLogin.Text}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"False\n{ex.Message}");
             }
+        }
+
+        public string MaskedPassword(string password)
+        {
+            string pass;
+
+            using (MD5CryptoServiceProvider maskPass = new MD5CryptoServiceProvider())
+            {
+                UTF8Encoding uTF8 = new UTF8Encoding();
+                byte[] bytes = maskPass.ComputeHash(uTF8.GetBytes(password));
+                pass = Convert.ToBase64String(bytes);
+            }
+
+            return pass;
         }
 
         private void WindowMouseDown(object sender, MouseButtonEventArgs e)
