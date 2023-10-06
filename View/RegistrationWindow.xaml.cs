@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Data.Entity;
 using System.IO;
+using System.Diagnostics.Eventing.Reader;
 
 namespace RegistrationApp_Test
 {
@@ -183,33 +184,26 @@ namespace RegistrationApp_Test
                     $"Логин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
                 return "Логин должен содержать минимум 5 символов";
             }
-            
-            if (login.Contains("@"))
+
+            if (login.Contains("@") && !(login.Contains(".com") ^ login.Contains(".ru")))
             {
-                if (!(login.Contains(".com") ^ login.Contains(".ru")))
-                {
-                    Log.Error($"Невозможно зарегистрировать пользователя. Неверный формат почты.\n" +
-                        $"Логин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
-                    return "Неверный формат почты. Почта должна быть формата (xxx@xxx.xxx)";
-                }
+                Log.Error($"Невозможно зарегистрировать пользователя. Неверный формат почты.\n" +
+                    $"Логин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
+                return "Неверный формат почты. Почта должна быть формата (xxx@xxx.xxx)";
             }
 
-            if (Regex.IsMatch(login, @"^[a-zA-Z0-9_]+$"))
+            if (Regex.IsMatch(login, @"^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[_]).+$"))
             {
                 return null;
             }
-             
-            if (login.StartsWith("+"))
-            {
 
-                return null;
-            }
-            else
-            {
-                Log.Error($"Невозможно зарегистрировать пользователя. Логин не соотвествует требованиям.\n" +
-                $"Логин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
-                return "Логин должен иметь только латиницу, цифры и знак подчеркивания _";
-            }
+            if (login.StartsWith("+")) return null;
+
+            Log.Error($"Невозможно зарегистрировать пользователя. Логин не соотвествует требованиям.\n" +
+                    $"Логин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
+            return "Cтроковый логин должен иметь только латиницу, цифры и знак подчеркивания _\n" +
+                "Номер телнфона должен быть в формате +7-xxx-xxx-xxxx";
+
         }
 
         public string PasswordVerification(string login, string password, string checkPassword)
@@ -281,9 +275,11 @@ namespace RegistrationApp_Test
             if (exception == null)
                 exception = PasswordVerification(login, password, checkPassword);
 
-            try
+            if (exception == null)
             {
+
                 Log.Debug("Добавление пользователя в базу данных");
+
                 User user = new User(login, password);
                 db.Users.Add(user);
                 db.SaveChanges();
@@ -294,7 +290,7 @@ namespace RegistrationApp_Test
                 MessageBox.Show("True");
                 Log.Information($"Успешная регистрация\nЛогин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
             }
-            catch
+            else
             {
                 MessageBox.Show($"False\n{exception}");
             }
