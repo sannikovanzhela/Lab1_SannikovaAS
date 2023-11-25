@@ -106,8 +106,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CheckRegistrationData.cs" />
-    <Compile Include="Database\ApplicationContext.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="Database\DatabaseRepository.cs" />
     <Compile Include="Database\User.cs" />
+    <Compile Include="Messager.cs" />
     <Compile Include="View\RegistrationWindow.xaml.cs">
       <DependentUpon>RegistrationWindow.xaml</DependentUpon>
     </Compile>
@@ -146,9 +148,6 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="UsersDB.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -11,15 +11,23 @@ using System.Text;
 using System.Data.Entity;
 using System.IO;
 using System.Diagnostics.Eventing.Reader;
+using DataBaseFunctional;
 
 namespace RegistrationApp_Test
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
-    public partial class RegistrationWindow : Window
+    public interface IView
     {
-        ApplicationContext db;
+        void ShowResult((string,string) result);
+        event Action<(string, string, string)> runCheck;
+    }
+
+    public partial class RegistrationWindow : Window, IView
+    {
+
+        DatabaseRepository db = new DatabaseRepository();
         public RegistrationWindow()
         {
             InitializeComponent();
@@ -32,12 +40,6 @@ namespace RegistrationApp_Test
 
             Log.Verbose("Логгер сконфигурирован");
             Log.Information("Приложение запущено");
-
-            db = new ApplicationContext();
-            db.Users.Load();
-            this.DataContext = db.Users.Local.ToBindingList();
-            Log.Information("Получение данных из базы данных");
-
         }
 
         #region txt
@@ -112,44 +114,15 @@ namespace RegistrationApp_Test
         }
 
 
-
+        public event Action<(string, string, string)> runCheck;
         private void btnSignClick(object sender, RoutedEventArgs e)
         {
-            string login = txtLogin.Text;
-            string password = txtPassword.Password;
-            string checkPassword = txtCheck.Password;
-            string exception;
+            runCheck.DynamicInvoke(txtLogin.Text, txtPassword.Password, txtCheck.Password);
+        }
 
-            CheckRegistrationData check = new CheckRegistrationData();
-
-            exception = check.UserInformation(login, password, checkPassword);
-
-            if (exception == null)
-                exception = check.UserValidate(login, password, checkPassword);
-            if (exception == null)
-                exception = check.LoginVerification(login, password, checkPassword);
-            if (exception == null)
-                exception = check.PasswordVerification(login, password, checkPassword);
-
-            if (exception == null)
-            {
-
-                Log.Debug("Добавление пользователя в базу данных");
-
-                User user = new User(login, password);
-                db.Users.Add(user);
-                db.SaveChanges();
-
-                string pass = check.MaskedPassword(password);
-                string checkPass = check.MaskedPassword(checkPassword);
-
-                MessageBox.Show("True");
-                Log.Information($"Успешная регистрация\nЛогин: {login}\nПароль: {pass}\nПодтверждение пароля: {checkPass}");
-            }
-            else
-            {
-                MessageBox.Show($"False\n{exception}");
-            }
+        public void ShowResult((string,string) result)
+        {
+            MessageBox.Show(result.Item1, result.Item2);
         }
 
         private void WindowMouseDown(object sender, MouseButtonEventArgs e)
